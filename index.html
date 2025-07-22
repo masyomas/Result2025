@@ -1,99 +1,63 @@
+
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نتيجة الصف الأول الثانوي 2025</title>
+<title>نتيجة الصف الأول الثانوي ٢٠٢٥</title>
 <style>
-    body {
-        font-family: 'Cairo', sans-serif;
-        background: linear-gradient(135deg, silver, gold, #b9f2ff);
-        color: #222;
-        padding: 20px;
-        text-align: center;
-    }
-    h1, h2 {
-        margin: 10px 0;
-    }
-    input, button {
-        font-size: 18px;
-        margin: 10px;
-        padding: 8px 12px;
-        border-radius: 6px;
-        border: none;
-    }
-    #btn {
-        background-color: #d4af37;
-        color: white;
-        cursor: pointer;
-    }
-    table {
-        margin: 20px auto;
-        border-collapse: collapse;
-        width: 90%;
-        max-width: 600px;
-    }
-    th, td {
-        border: 1px solid #888;
-        padding: 8px;
-        font-size: 16px;
-    }
-    footer {
-        margin-top: 30px;
-        font-size: 14px;
-    }
+body {
+  background: linear-gradient(135deg, silver, gold, #b9f2ff);
+  font-family: 'Arial', sans-serif;
+  direction: rtl;
+  text-align: center;
+}
+h1 {
+  color: #333;
+}
+table {
+  margin: auto;
+  border-collapse: collapse;
+  width: 80%%;
+  background-color: #fff;
+  border: 2px solid #444;
+}
+td, th {
+  border: 1px solid #999;
+  padding: 8px;
+}
+footer {
+  margin-top: 20px;
+  font-size: 18px;
+  color: #222;
+}
 </style>
 </head>
 <body>
-    <h1>نتيجة الصف الأول الثانوي للعام ٢٠٢٥</h1>
-    <h2>مدرسة الخدمة الثانوية العامة المشتركة</h2>
-    <input type="text" id="seatNum" placeholder="ادخل رقم الجلوس" />
-    <button id="btn" onclick="search()">بحث</button>
-    <div id="result"></div>
-    <footer>مع تحياتي أ/ محمود عادل صالح</footer>
-
+<h1>نتيجة الصف الاول الثانوي للعام ٢٠٢٥</h1>
+<h2>مدرسة الخدمة الثانوية العامة المشتركة</h2>
+<input type="text" id="seatInput" placeholder="ادخل رقم الجلوس" />
+<button onclick="searchResult()">بحث</button>
+<div id="result"></div>
+<footer>مع تحياتي أ/ محمود عادل صالح</footer>
 <script>
-    const jsonUrl = "https://dl.dropboxusercontent.com/scl/fi/o03lokaoj4jw0ff4ofrxg/students.json?rlkey=j9umgn3gt8mc243z5gfr1y1aw&st=s7aut6zs";
-    let students = [];
+let students;
+fetch('students.json').then(res => res.json()).then(data => students = data);
 
-    // تحميل بيانات الطلاب
-    fetch(jsonUrl)
-      .then(response => response.json())
-      .then(data => students = data)
-      .catch(err => { alert('خطأ في تحميل البيانات'); });
-
-    function search() {
-        let input = document.getElementById('seatNum').value.trim();
-        // تحويل الأرقام الهندية إلى عربية
-        const arabicNums = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
-        input = input.replace(/[٠-٩]/g, d => arabicNums[d]);
-
-        const student = students.find(s => s["رقم الجلوس"] == input);
-        const resDiv = document.getElementById('result');
-
-        if (student) {
-            let html = '<table>';
-            html += `<tr><th>رقم الجلوس</th><td>${student["رقم الجلوس"]}</td></tr>`;
-
-            const nameKey = Object.keys(student).find(k => k.includes("اسم"));
-            if (nameKey) html += `<tr><th>اسم الطالب</th><td>${student[nameKey]}</td></tr>`;
-            if (student["عدد ايام الغياب"]) html += `<tr><th>عدد أيام الغياب</th><td>${student["عدد ايام الغياب"]}</td></tr>`;
-            if (student["المجموع الكلي"]) html += `<tr><th>المجموع الكلي</th><td>${student["المجموع الكلي"]}</td></tr>`;
-            if (student["نتيجة الطالب"]) html += `<tr><th>النتيجة</th><td>${student["نتيجة الطالب"]}</td></tr>`;
-
-            // عرض باقي المواد
-            for (const k in student) {
-                if (!["رقم الجلوس", nameKey, "عدد ايام الغياب", "المجموع الكلي", "نتيجة الطالب"].includes(k)) {
-                    html += `<tr><th>${k}</th><td>${student[k]}</td></tr>`;
-                }
-            }
-
-            html += '</table>';
-            resDiv.innerHTML = html;
-        } else {
-            resDiv.innerHTML = '<p style="color:red;">لا يوجد طالب بهذا الرقم.</p>';
-        }
+function searchResult(){
+  let seat = document.getElementById('seatInput').value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  let student = students.find(s => s.seat_number === seat);
+  let div = document.getElementById('result');
+  if(student){
+    let table = '<table><tr><th>المادة</th><th>الدرجة</th></tr>';
+    for(let subject in student.subjects){
+      table += `<tr><td>${subject}</td><td>${student.subjects[subject]}</td></tr>`;
     }
+    table += `</table><p>المجموع: ${student.total}</p><p>الغياب: ${student.absence} أيام</p>`;
+    div.innerHTML = table;
+  } else {
+    div.innerHTML = "<p>لم يتم العثور على الطالب</p>";
+  }
+}
 </script>
 </body>
 </html>
